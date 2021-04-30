@@ -3,6 +3,7 @@ package com.github.florent37.singledateandtimepicker;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.graphics.Color;
 import android.graphics.Typeface;
 import android.text.TextUtils;
 import android.text.format.DateFormat;
@@ -55,22 +56,22 @@ public class SingleDateAndTimePicker extends LinearLayout {
     private static final CharSequence FORMAT_12_HOUR = "EEE d MMM h:mm a";
 
     @NonNull
-    private final WheelYearPicker yearsPicker;
+    private  WheelYearPicker yearsPicker;
 
     @NonNull
-    private final WheelMonthPicker monthPicker;
+    private  WheelMonthPicker monthPicker;
 
     @NonNull
-    private final WheelDayOfMonthPicker daysOfMonthPicker;
+    private  WheelDayOfMonthPicker daysOfMonthPicker;
 
     @NonNull
-    private final WheelDayPicker daysPicker;
+    private  WheelDayPicker daysPicker;
     @NonNull
-    private final WheelMinutePicker minutesPicker;
+    private  WheelMinutePicker minutesPicker;
     @NonNull
-    private final WheelHourPicker hoursPicker;
+    private  WheelHourPicker hoursPicker;
     @NonNull
-    private final WheelAmPmPicker amPmPicker;
+    private  WheelAmPmPicker amPmPicker;
 
     private List<WheelPicker> pickers = new ArrayList<>();
 
@@ -78,6 +79,8 @@ public class SingleDateAndTimePicker extends LinearLayout {
 
     private View dtSelector;
     private boolean mustBeOnFuture;
+
+    private boolean mustBeInPast;
 
     @Nullable
     private Date minDate;
@@ -103,14 +106,22 @@ public class SingleDateAndTimePicker extends LinearLayout {
         this(context, attrs, 0);
     }
 
+    private Context context = null;
+    private     AttributeSet attrs = null;
     public SingleDateAndTimePicker(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
 
+        this.context = context;
+        this.attrs = attrs;
         defaultDate = new Date();
         isAmPm = !(DateFormat.is24HourFormat(context));
 
         inflate(context, R.layout.single_day_and_time_picker, this);
 
+        init();
+    }
+
+    public void init() {
         yearsPicker = findViewById(R.id.yearPicker);
         monthPicker = findViewById(R.id.monthPicker);
         daysOfMonthPicker = findViewById(R.id.daysOfMonthPicker);
@@ -373,6 +384,11 @@ public class SingleDateAndTimePicker extends LinearLayout {
         dtSelector.setBackgroundColor(selectorColor);
     }
 
+    public void setSelectorDrawable(int selectorDrawable) {
+        dtSelector.setBackgroundColor(Color.TRANSPARENT);
+        dtSelector.setBackgroundResource(selectorDrawable);
+    }
+
     public void setSelectorHeight(int selectorHeight) {
         final ViewGroup.LayoutParams dtSelectorLayoutParams = dtSelector.getLayoutParams();
         dtSelectorLayoutParams.height = selectorHeight;
@@ -593,6 +609,15 @@ public class SingleDateAndTimePicker extends LinearLayout {
             minDate = now.getTime(); //minDate is Today
         }
     }
+    public void setMustBeInPast(boolean mustBeInPast) {
+        this.mustBeInPast = mustBeInPast;
+//        daysPicker.setShowOnlyFutureDate(mustBeOnFuture);
+        if (mustBeInPast) {
+            Calendar now = Calendar.getInstance();
+            now.setTimeZone(dateHelper.getTimeZone());
+            maxDate = now.getTime(); //minDate is Today
+        }
+    }
 
     public boolean mustBeOnFuture() {
         return mustBeOnFuture;
@@ -660,6 +685,14 @@ public class SingleDateAndTimePicker extends LinearLayout {
             updateDaysOfMonth(now);
         }
         daysPicker.updateAdapter(); // For MustBeFuture and dayCount
+    }
+
+    public void setMonthNames(String[] monthNames) {
+        daysPicker.setMonthNames(monthNames);
+    }
+
+    public void setDayNames(String[] dayNames) {
+        daysPicker.setDayNames(dayNames);
     }
 
     public interface OnDateChangedListener {

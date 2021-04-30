@@ -3,6 +3,8 @@ package com.github.florent37.singledateandtimepicker.widget;
 import android.content.Context;
 import android.util.AttributeSet;
 
+import androidx.annotation.NonNull;
+
 import com.github.florent37.singledateandtimepicker.R;
 
 import java.text.SimpleDateFormat;
@@ -11,8 +13,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-
-import androidx.annotation.NonNull;
 
 import static com.github.florent37.singledateandtimepicker.widget.SingleDateAndTimeConstants.DAYS_PADDING;
 
@@ -98,7 +98,18 @@ public class WheelDayPicker extends WheelPicker<DateWithLabel> {
     }
 
     protected String getFormattedValue(Object value) {
-        return getDateFormat().format(value);
+        if (monthNames == null || dayNames == null) {
+            return getDateFormat().format(value);
+        } else {
+            return getFormattedValueCustom(value);
+        }
+    }
+
+    protected String getFormattedValueCustom(Object value) {
+        String text = "";
+        Date date = (Date) value;
+        text = dayNames[date.getDay() ] + " " + date.getDate() + " " + monthNames[date.getMonth()];
+        return text;
     }
 
     public WheelDayPicker setDayFormatter(SimpleDateFormat simpleDateFormat) {
@@ -156,6 +167,17 @@ public class WheelDayPicker extends WheelPicker<DateWithLabel> {
                 notifyDatasetChanged();
             }
         }
+    }
+
+    String[] monthNames = null;
+    String[] dayNames = null;
+
+    public void setMonthNames(String[] monthNames) {
+        this.monthNames = monthNames;
+    }
+
+    public void setDayNames(String[] dayNames) {
+        this.dayNames = dayNames;
     }
 
     public interface OnDaySelectedListener {
